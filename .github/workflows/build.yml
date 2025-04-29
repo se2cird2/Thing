@@ -1,5 +1,6 @@
 # .github/workflows/build.yml
 name: Build Theos Tweak
+uses: actions/upload-artifact@v3
 
 on:
   push:
