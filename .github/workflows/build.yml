@@ -1,7 +1,6 @@
 # .github/workflows/build.yml
 name: Build Theos Tweak
 
-
 on:
   push:
     branches:
@@ -16,33 +15,33 @@ jobs:
       - name: Check out repo
         uses: actions/checkout@v4
 
-      # 2. Set up Theos
+      # 2. Install Theos environment
       - name: Install Theos
         uses: Randomblock1/theos-action@v1
         with:
-          theos-dir: 'theos'                 # where to clone Theos
+          theos-dir: 'theos'
           theos-src: 'https://github.com/theos/theos'
           theos-sdks: 'https://github.com/theos/sdks'
-          theos-sdks-branch: 'master'        # SDKs branch
-          orion: 'false'                     # disable Swift support by default  [oai_citation:1‡GitHub](https://github.com/marketplace/actions/install-theos?utm_source=chatgpt.com)
+          theos-sdks-branch: 'master'
+          orion: 'false'
 
       # 3. Build the tweak
       - name: Build tweak
         run: |
-          export THEOS=/home/runner/work/_temp/theos
+          export THEOS=$(pwd)/theos
           export PATH="$THEOS/bin:$PATH"
-          make clean package                # produces .deb and .dylib via Theos  [oai_citation:2‡theos.dev](https://theos.dev/docs/rootless?utm_source=chatgpt.com)
+          make clean package
 
-      # 4. Upload artifacts
+      # 4. Upload .deb artifact
       - name: Upload .deb artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v3.1.3
         with:
           name: tweak-package
           path: ./packages/*.deb
 
+      # 5. Upload .dylib artifact
       - name: Upload .dylib artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v3.1.3
         with:
           name: dylib
-          path: ./obj/$(PROJECT_NAME).dylib
-          
+          path: ./obj/*.dylib
