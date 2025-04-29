@@ -1,47 +1,57 @@
-# .github/workflows/build.yml
-name: Build Theos Tweak
+name: Build and Release
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main, master ]
+    tags: [ '*' ]
   pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: macos-latest
     steps:
-      # 1. Checkout your code
-      - name: Check out repo
+      - name: Checkout
         uses: actions/checkout@v4
 
-      # 2. Install Theos environment
-      - name: Install Theos
-        uses: Randomblock1/theos-action@v1
-        with:
-          theos-dir: 'theos'
-          theos-src: 'https://github.com/theos/theos'
-          theos-sdks: 'https://github.com/theos/sdks'
-          theos-sdks-branch: 'master'
-          orion: 'false'
-
-      # 3. Build the tweak
-      - name: Build tweak
+      - name: Setup Dependencies
         run: |
-          export THEOS=$(pwd)/theos
-          export PATH="$THEOS/bin:$PATH"
-          make clean package
+          brew install ldid xz
 
-      # 4. Upload .deb artifact
-      - name: Upload .deb artifact
+      - name: Setup Theos
+        run: |
+          git clone --recursive https://github.com/theos/theos.git theos
+          echo "THEOS=$GITHUB_WORKSPACE/theos" >> $GITHUB_ENV
+          echo "$GITHUB_WORKSPACE/theos/bin" >> $GITHUB_PATH
+
+      - name: Setup SDKs
+        run: |
+          curl -LO https://github.com/theos/sdks/archive/master.zip
+          unzip master.zip -d .
+          mkdir -p theos/sdks
+          mv sdks-master/*.sdk theos/sdks/
+          rm -rf master.zip sdks-master
+
+      - name: Build Package
+        run: |
+          make clean package FINALPACKAGE=1
+
+      - name: Upload .deb Artifact
         uses: actions/upload-artifact@v3.1.3
         with:
-          name: tweak-package
-          path: ./packages/*.deb
+          name: StikJIT-Deb
+          path: packages/*.deb
 
-      # 5. Upload .dylib artifact
-      - name: Upload .dylib artifact
+      - name: Upload .dylib Artifact
         uses: actions/upload-artifact@v3.1.3
         with:
-          name: dylib
-          path: ./obj/*.dylib
+          name: StikJIT-Dylib
+          path: obj/*.dylib
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v1
+        with:
+          files: packages/*.deb
+          generate_release_notes: true
