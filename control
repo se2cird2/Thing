@@ -1,0 +1,8 @@
+Package: com.se2crid.filepickerfix
+Name: FilePickerFix
+Version: 1.0-1
+Architecture: iphoneos-arm64 iphoneos-arm64e
+Depends: mobilesubstrate, firmware (>= 17.0.1)
+Section: Tweaks
+Priority: optional
+Maintainer: @se2crid on diescord
