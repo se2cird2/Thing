@@ -1,8 +1,0 @@
-Package: com.yourname.filepickerfix
-Name: FilePickerFix
-Version: 1.0.0
-Architecture: iphoneos-arm
-Description: Fixes file picker behavior on iOS 17+
-Maintainer: Your Name
-Author: Your Name
-Section: Tweaks
